@@ -1,0 +1,14 @@
+*.iml
+*.ipr
+*.iws
+.gradle/
+build/
+out/
+.idea/
+gradle/
+node_modules/
+gradlew*
+.env
+.tx/
+api-definition.json
+api-definition.html

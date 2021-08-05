@@ -1,0 +1,10 @@
+version: "2"
+services:
+  builder:
+    image: openlmis/dev:6
+    volumes:
+      - '.:/app'
+    command:
+      - './build.sh'
+    environment:
+      GRADLE_OPTS: '-Dorg.gradle.daemon=false'
