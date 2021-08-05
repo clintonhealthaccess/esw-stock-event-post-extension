@@ -1,6 +1,6 @@
 version: "2"
 services:
-  shipment-create-post-extension:
+  stock-event-post-extension:
     image: openlmis/dev:6
     volumes:
       - '.:/app'

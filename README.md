@@ -1,4 +1,4 @@
-# OpenLMIS Eswatini Shipment Create Post Extension Module
+# OpenLMIS Eswatini Stock Event Post Extension Module
 
 ## Prerequisites
 * Docker 1.11+
