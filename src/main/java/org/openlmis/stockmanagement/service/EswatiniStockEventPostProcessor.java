@@ -13,7 +13,7 @@
  * http://www.gnu.org/licenses.  For additional information contact info@OpenLMIS.org. 
  */
 
-package org.openlmis.fulfillment.service;
+package org.openlmis.stockmanagement.service;
 
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.extension.point.StockEventPostProcessor;
@@ -30,5 +30,6 @@ public class EswatiniStockEventPostProcessor implements StockEventPostProcessor 
   @Override
   public void process(StockEventDto stockEventDto) {
     XLOGGER.debug("EswatiniStockEventPostProcessor init");
+
   }
 }
