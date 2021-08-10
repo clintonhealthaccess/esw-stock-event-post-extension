@@ -1,6 +1,7 @@
 package org.openlmis.stockmanagement.service.notifier;
 
 import antlr.ASTNULLType;
+import org.apache.logging.log4j.util.Strings;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
@@ -21,6 +22,8 @@ import org.springframework.stereotype.Component;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_INVENTORIES_EDIT;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class StockAdjustmentNotifier {
@@ -57,12 +60,23 @@ public class StockAdjustmentNotifier {
     inventoryOptional.ifPresent(physicalInventory -> {
       List<PhysicalInventoryLineItem> lineItems = physicalInventory.getLineItems();
       lineItems.forEach(item -> {
+        String reasonsText = item.getStockAdjustments().stream()
+                .map(a -> String.format("%d %s", a.getQuantity(), a.getReason().getName()))
+                .collect(Collectors.joining(", "));
         String orderableName = stockCardNotifier.getOrderableName(item.getOrderableId());
         Integer previousStockOnHandWhenSubmitted = item.getPreviousStockOnHandWhenSubmitted();
         Integer quantity = item.getQuantity();
         int diff = quantity - previousStockOnHandWhenSubmitted;
         if (diff != 0) {
-          messageBuilder.append(String.format("%s %d", orderableName, diff));
+          messageBuilder.append(String.format("%s, Stock on Hand: %d, Current Stock: %d%s\n",
+                  orderableName,
+                  previousStockOnHandWhenSubmitted,
+                  quantity,
+                  !Strings.isEmpty(reasonsText) ?
+                          String.format(" , Reasons: %s", reasonsText)
+                          : ""
+                  )
+          );
         }
       });
     });
@@ -78,8 +92,11 @@ public class StockAdjustmentNotifier {
     for (UserDto recipient : recipients) {
       if (facilityId.equals(recipient.getHomeFacilityId())) {
         XLOGGER.debug("Recipient username = {}", recipient.getUsername());
+        String programName = stockCardNotifier.getProgramName(programId);
+        String facilityName = stockCardNotifier.getFacilityName(facilityId);
+        String subject = String.format("Stock for %s - %s  has been adjusted", facilityName, programName);
         notificationService.notify(recipient,
-                "Stock has been adjusted", messageBuilder.toString());
+                subject, messageBuilder.toString());
       }
     }
 
