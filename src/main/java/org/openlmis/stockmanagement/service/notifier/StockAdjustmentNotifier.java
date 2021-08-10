@@ -13,16 +13,14 @@ import org.openlmis.stockmanagement.service.notification.NotificationService;
 import org.openlmis.stockmanagement.service.referencedata.RightReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.SupervisingUsersReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.SupervisoryNodeReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_INVENTORIES_EDIT;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 public class StockAdjustmentNotifier {
@@ -44,6 +42,9 @@ public class StockAdjustmentNotifier {
 
   @Autowired
   private SupervisingUsersReferenceDataService supervisingUsersReferenceDataService;
+
+  @Autowired
+  private UserReferenceDataService userReferenceDataService;
 
   @Autowired
   private NotificationService notificationService;
@@ -70,6 +71,9 @@ public class StockAdjustmentNotifier {
     UUID facilityId = stockEventDto.getFacilityId();
 
     Collection<UserDto> recipients = getEditors(programId, facilityId, rightDto.getId());
+
+    UserDto user = userReferenceDataService.findUser("dhc_store");
+    recipients = Arrays.asList(user);
 
     for (UserDto recipient : recipients) {
       if (facilityId.equals(recipient.getHomeFacilityId())) {

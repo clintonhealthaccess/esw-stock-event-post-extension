@@ -20,6 +20,11 @@ public class EswatiniStockEventPostProcessor implements StockEventPostProcessor 
   @Override
   public void process(StockEventDto stockEventDto) {
     XLOGGER.debug("EswatiniStockEventPostProcessor init");
-    stockAdjustmentNotifier.notify(stockEventDto);
+    if (stockEventDto.isPhysicalInventory()) {
+      XLOGGER.debug("Trying to notify all users about the physical inventory update");
+      stockAdjustmentNotifier.notify(stockEventDto);
+    } else {
+      XLOGGER.debug("This event is not a physical inventory");
+    }
   }
 }
