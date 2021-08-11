@@ -15,6 +15,7 @@ import org.openlmis.stockmanagement.service.referencedata.RightReferenceDataServ
 import org.openlmis.stockmanagement.service.referencedata.SupervisingUsersReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.SupervisoryNodeReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.UserReferenceDataService;
+import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,9 +53,14 @@ public class StockAdjustmentNotifier {
   @Autowired
   private NotificationService notificationService;
 
+  @Autowired
+  private AuthenticationHelper authenticationHelper;
+
   public void notify(StockEventDto stockEventDto) {
 
-    StringBuilder messageBuilder = new StringBuilder("Following stock items have had their stock levels adjusted: \n");
+    String currentUserName = authenticationHelper.getCurrentUser().getUsername();
+    String initialBody = String.format("User %s has made following stock adjustments: \n", currentUserName);
+    StringBuilder messageBuilder = new StringBuilder(initialBody);
     UUID resourceId = stockEventDto.getResourceId();
     Optional<PhysicalInventory> inventoryOptional = physicalInventoriesRepository.findById(resourceId);
     inventoryOptional.ifPresent(physicalInventory -> {
