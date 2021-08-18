@@ -57,7 +57,28 @@ public class StockAdjustmentNotifier {
   private AuthenticationHelper authenticationHelper;
 
   public void notify(StockEventDto stockEventDto) {
+    String message = buildMessage(stockEventDto);
+    sendMessage(stockEventDto, message);
+  }
 
+  private void sendMessage(StockEventDto stockEventDto, String message) {
+    RightDto rightDto = rightReferenceDataService.findRight(STOCK_INVENTORIES_EDIT);
+    UUID programId = stockEventDto.getProgramId();
+    UUID facilityId = stockEventDto.getFacilityId();
+
+    Collection<UserDto> recipients = getEditors(programId, facilityId, rightDto.getId());
+
+    for (UserDto recipient : recipients) {
+        XLOGGER.debug("Recipient username = {}", recipient.getUsername());
+        String programName = stockCardNotifier.getProgramName(programId);
+        String facilityName = stockCardNotifier.getFacilityName(facilityId);
+        String subject = String.format("Stock for %s - %s  has been adjusted", facilityName, programName);
+        notificationService.notify(recipient,
+                subject, message);
+    }
+  }
+
+  private String buildMessage(StockEventDto stockEventDto) {
     String currentUserName = authenticationHelper.getCurrentUser().getUsername();
     String initialBody = String.format("User %s has made following stock adjustments: \n", currentUserName);
     StringBuilder messageBuilder = new StringBuilder(initialBody);
@@ -86,26 +107,7 @@ public class StockAdjustmentNotifier {
         }
       });
     });
-    RightDto rightDto = rightReferenceDataService.findRight(STOCK_INVENTORIES_EDIT);
-    UUID programId = stockEventDto.getProgramId();
-    UUID facilityId = stockEventDto.getFacilityId();
-
-    Collection<UserDto> recipients = getEditors(programId, facilityId, rightDto.getId());
-
-    UserDto user = userReferenceDataService.findUser("dhc_store");
-    recipients = Arrays.asList(user);
-
-    for (UserDto recipient : recipients) {
-      if (facilityId.equals(recipient.getHomeFacilityId())) {
-        XLOGGER.debug("Recipient username = {}", recipient.getUsername());
-        String programName = stockCardNotifier.getProgramName(programId);
-        String facilityName = stockCardNotifier.getFacilityName(facilityId);
-        String subject = String.format("Stock for %s - %s  has been adjusted", facilityName, programName);
-        notificationService.notify(recipient,
-                subject, messageBuilder.toString());
-      }
-    }
-
+    return messageBuilder.toString();
   }
 
   private Collection<UserDto> getEditors(UUID programId, UUID facilityId, UUID rightId) {
@@ -119,6 +121,10 @@ public class StockAdjustmentNotifier {
     }
 
     XLOGGER.debug("Supervisory node ID = {}", supervisoryNode.getId());
+    XLOGGER.debug("Searching for supervising users with node ID = {} rightid = {} programId = {}",
+            supervisoryNode.getId(),
+            rightId,
+            programId);
 
     return supervisingUsersReferenceDataService
             .findAll(supervisoryNode.getId(), rightId, programId);
