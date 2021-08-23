@@ -4,9 +4,13 @@ import com.google.common.collect.Iterables;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
+import org.openlmis.stockmanagement.dto.StockCardDto;
+import org.openlmis.stockmanagement.dto.StockCardLineItemDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
+import org.openlmis.stockmanagement.repository.StockCardRepository;
 import org.openlmis.stockmanagement.service.CalculatedStockOnHandService;
+import org.openlmis.stockmanagement.service.StockCardService;
 import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
@@ -30,7 +34,10 @@ public class EswatiniStockAdjustmentNotifier {
   private AuthenticationHelper authenticationHelper;
 
   @Autowired
-  private CalculatedStockOnHandService calculatedStockOnHandService;
+  private StockCardService stockCardService;
+
+  @Autowired
+  private StockCardRepository stockCardRepository;
 
   @Autowired
   private EswatiniNotifierService eswatiniNotifierService;
@@ -48,15 +55,16 @@ public class EswatiniStockAdjustmentNotifier {
       UUID orderableId = item.getOrderableId();
       String orderableName = stockCardNotifier.getOrderableName(orderableId);
 
-      List<StockCard> cards = calculatedStockOnHandService.getStockCardsWithStockOnHandByOrderableIds(stockEventDto.getProgramId(),
-              stockEventDto.getFacilityId(),
-              Arrays.asList(orderableId));
+      List<StockCard> cards = stockCardRepository.findByOrderableIdInAndProgramIdAndFacilityId(Arrays.asList(orderableId),
+              stockEventDto.getProgramId(),
+              stockEventDto.getFacilityId());
       for (StockCard stockCard : cards) {
-        StockCardLineItem latestLineItem = Iterables.getLast(stockCard.getLineItems());
-        Integer quantityWithSign = latestLineItem.getQuantityWithSign();
-        Integer stockOnHand = latestLineItem.getStockOnHand();
-
-        StockCardLineItemReason reason = latestLineItem.getReason();
+        StockCardDto stockCardDto = stockCardService.findStockCardById(stockCard.getId());
+        StockCardLineItemDto stockCardLineItemDto = Iterables.getLast(stockCardDto.getLineItems());
+        StockCardLineItem lineItem = stockCardLineItemDto.getLineItem();
+        Integer quantityWithSign = lineItem.getQuantityWithSign();
+        Integer stockOnHand = lineItem.getStockOnHand();
+        StockCardLineItemReason reason = lineItem.getReason();
         XLOGGER.debug("QuantityWithSign: {} StockOnHand: {} Orderable Name: {} Reason Name: {}",
                 quantityWithSign,
                 stockOnHand,
