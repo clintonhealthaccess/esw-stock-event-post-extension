@@ -3,6 +3,7 @@ package org.openlmis.stockmanagement.service.notifier;
 import com.google.common.collect.Iterables;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
+import org.openlmis.stockmanagement.domain.reason.StockCardLineItemReason;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.service.CalculatedStockOnHandService;
@@ -55,11 +56,17 @@ public class EswatiniStockAdjustmentNotifier {
         Integer quantityWithSign = latestLineItem.getQuantityWithSign();
         Integer stockOnHand = latestLineItem.getStockOnHand();
 
+        StockCardLineItemReason reason = latestLineItem.getReason();
+        XLOGGER.debug("QuantityWithSign: {} StockOnHand: {} Orderable Name: {} Reason Name: {}",
+                quantityWithSign,
+                stockOnHand,
+                orderableName,
+                reason != null  ? reason.getName() : "");
         messageBuilder.append(String.format("%s, Stock on Hand: %d, Current Stock: %d, Reason: %s\n",
                         orderableName,
                         stockOnHand + (-quantityWithSign),
                         stockOnHand,
-                        latestLineItem.getReason().getName()
+                        reason != null  ? reason.getName() : ""
                 )
         );
 
