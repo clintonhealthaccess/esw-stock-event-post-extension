@@ -5,10 +5,12 @@ import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.service.EswatiniRoleAssignmentService;
 import org.openlmis.stockmanagement.service.EswatiniUserService;
 import org.openlmis.stockmanagement.service.notification.NotificationService;
+import org.openlmis.stockmanagement.util.RequestParameters;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +43,7 @@ public class EswatiniScheduledNotifier {
             if (counter == 0) {
                 XLOGGER.debug("Counter = 0 so sending mail");
 
-                Collection<UserDto> userDtos = userService.findAll();
+                Page<UserDto> userDtos = userService.getPage(RequestParameters.init());
                 for (UserDto user : userDtos) {
                     Collection<RoleAssignmentDto> roleAssignments = roleAssignmentService.getRoleAssignments(user.getId());
                     boolean sendNotification = roleAssignments.stream()
