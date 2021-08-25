@@ -5,6 +5,7 @@ import org.openlmis.stockmanagement.service.referencedata.BaseReferenceDataServi
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -25,7 +26,7 @@ public class EswatiniUserService extends BaseReferenceDataService<UserDto> {
         return UserDto[].class;
     }
 
-    public Collection<UserDto> rightSearch(Map<String, Object> parameters) {
-        return super.findAll("rightSearch", parameters);
+    public Collection<UserDto> findAll() {
+        return super.findAll("", new HashMap<>());
     }
 }

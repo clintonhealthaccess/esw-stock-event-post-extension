@@ -1,11 +1,10 @@
 package org.openlmis.stockmanagement.service.notifier;
 
-import org.apache.commons.collections4.map.HashedMap;
-import org.openlmis.stockmanagement.dto.referencedata.RightDto;
+import org.openlmis.stockmanagement.dto.referencedata.RoleAssignmentDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
+import org.openlmis.stockmanagement.service.EswatiniRoleAssignmentService;
 import org.openlmis.stockmanagement.service.EswatiniUserService;
 import org.openlmis.stockmanagement.service.notification.NotificationService;
-import org.openlmis.stockmanagement.service.referencedata.RightReferenceDataService;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,25 +13,23 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
-import java.util.UUID;
-
-import static org.openlmis.stockmanagement.service.PermissionService.STOCK_INVENTORIES_EDIT;
 
 @Component
 public class EswatiniScheduledNotifier {
 
     private static final XLogger XLOGGER = XLoggerFactory.getXLogger(EswatiniScheduledNotifier.class);
+    private static final String REQUIRED_ROLE_NAME = "Stock Manager";
 
     @Value("${time.zoneId}")
     private String timeZoneId;
 
     @Autowired
-    private EswatiniUserService eswatiniUserService;
-
-    int counter = 0;
+    private EswatiniUserService userService;
 
     @Autowired
-    private RightReferenceDataService rightReferenceDataService;
+    private EswatiniRoleAssignmentService roleAssignmentService;
+
+    int counter = 0;
 
     @Autowired
     private NotificationService notificationService;
@@ -40,20 +37,29 @@ public class EswatiniScheduledNotifier {
     @Scheduled(cron = "*/10 * * * * *", zone = "${time.zoneId}")
     public void remindToDoPhysicalCounting() {
         XLOGGER.debug("INIT remindToDoPhysicalCounting, Counter: {}", counter);
+        try {
+            if (counter == 0) {
+                XLOGGER.debug("Counter = 0 so sending mail");
 
-        if(counter == 0) {
-            XLOGGER.debug("Counter = 0 so sending mail");
-            RightDto rightDto = rightReferenceDataService.findRight(STOCK_INVENTORIES_EDIT);
-            UUID rightId = rightDto.getId();
-            XLOGGER.debug("Right ID: {}", rightId);
-            HashedMap<String, Object> parameters = new HashedMap<>();
-            parameters.put("rightId", rightId);
-            Collection<UserDto> userDtos = eswatiniUserService.rightSearch(parameters);
-            for (UserDto user : userDtos) {
-                XLOGGER.debug("Sending reminder mail to {}", user.getEmail());
-                notificationService.notify(user, "Reminder to perform physical count and report", "Please perform physical count and report");
+                Collection<UserDto> userDtos = userService.findAll();
+                for (UserDto user : userDtos) {
+                    Collection<RoleAssignmentDto> roleAssignments = roleAssignmentService.getRoleAssignments(user.getId());
+                    boolean sendNotification = roleAssignments.stream()
+                            .anyMatch(roleAssignmentDto -> REQUIRED_ROLE_NAME.equals(roleAssignmentDto.getRole().getName()));
+                    if (sendNotification) {
+                        XLOGGER.debug("Sending the reminder mail to {}", user.getUsername());
+                        notificationService.notify(user,
+                                "Reminder to perform physical count and report",
+                                "Please perform physical count and report");
+                    } else {
+                        XLOGGER.debug("Not sending the reminder mail to {} because they does not have the role {}", user.getUsername(), REQUIRED_ROLE_NAME);
+                    }
+                }
+
             }
+        } finally {
+            counter++;
         }
-        counter++;
+
     }
 }
