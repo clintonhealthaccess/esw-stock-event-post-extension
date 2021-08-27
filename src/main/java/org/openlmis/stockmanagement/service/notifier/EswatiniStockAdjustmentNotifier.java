@@ -49,7 +49,7 @@ public class EswatiniStockAdjustmentNotifier {
 
   private String buildMessage(StockEventDto stockEventDto) {
     Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    XLOGGER.debug("UserID: {}", principal);
+    XLOGGER.debug("UserID: {} stockEventDto.userId: {}", principal, stockEventDto.getUserId());
     String currentUserName = authenticationHelper.getCurrentUser().getUsername();
     String initialBody = String.format("User %s has made following stock adjustments: \n", currentUserName);
     StringBuilder messageBuilder = new StringBuilder(initialBody);
