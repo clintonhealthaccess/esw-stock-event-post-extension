@@ -14,6 +14,7 @@ import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -47,6 +48,8 @@ public class EswatiniStockAdjustmentNotifier {
   }
 
   private String buildMessage(StockEventDto stockEventDto) {
+    Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    XLOGGER.debug("UserID: {}", principal);
     String currentUserName = authenticationHelper.getCurrentUser().getUsername();
     String initialBody = String.format("User %s has made following stock adjustments: \n", currentUserName);
     StringBuilder messageBuilder = new StringBuilder(initialBody);
