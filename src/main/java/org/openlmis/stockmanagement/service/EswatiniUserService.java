@@ -1,15 +1,20 @@
 package org.openlmis.stockmanagement.service;
 
+import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
+import org.openlmis.stockmanagement.service.notifier.EswatiniStockAdjustmentNotifier;
 import org.openlmis.stockmanagement.service.referencedata.BaseReferenceDataService;
+import org.slf4j.ext.XLogger;
+import org.slf4j.ext.XLoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class EswatiniUserService extends BaseReferenceDataService<UserDto> {
+
+    private static final XLogger XLOGGER = XLoggerFactory.getXLogger(
+            EswatiniStockAdjustmentNotifier.class);
 
     @Override
     protected String getUrl() {
@@ -26,7 +31,11 @@ public class EswatiniUserService extends BaseReferenceDataService<UserDto> {
         return UserDto[].class;
     }
 
-    public Collection<UserDto> findAll() {
-        return super.findAll("", new HashMap<>());
+    public String getCurrentUserName(StockEventDto stockEventDto) {
+        UUID currentUserId = stockEventDto.getContext().getCurrentUserId();
+        UserDto currentUser = super.findOne(currentUserId);
+        String currentUserName = currentUser.getUsername();
+        XLOGGER.debug("Current User Name: {}", currentUserName);
+        return currentUserName;
     }
 }

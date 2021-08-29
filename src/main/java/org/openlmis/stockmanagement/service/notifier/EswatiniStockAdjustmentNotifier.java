@@ -9,12 +9,11 @@ import org.openlmis.stockmanagement.dto.StockCardLineItemDto;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.repository.StockCardRepository;
+import org.openlmis.stockmanagement.service.EswatiniUserService;
 import org.openlmis.stockmanagement.service.StockCardService;
-import org.openlmis.stockmanagement.util.AuthenticationHelper;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -31,7 +30,7 @@ public class EswatiniStockAdjustmentNotifier {
   private StockCardNotifier stockCardNotifier;
 
   @Autowired
-  private AuthenticationHelper authenticationHelper;
+  private EswatiniUserService eswatiniUserService;
 
   @Autowired
   private StockCardService stockCardService;
@@ -48,9 +47,7 @@ public class EswatiniStockAdjustmentNotifier {
   }
 
   private String buildMessage(StockEventDto stockEventDto) {
-    Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    XLOGGER.debug("UserID: {} stockEventDto.userId: {}", principal, stockEventDto.getUserId());
-    String currentUserName = authenticationHelper.getCurrentUser().getUsername();
+    String currentUserName = eswatiniUserService.getCurrentUserName(stockEventDto);
     String initialBody = String.format("User %s has made following stock adjustments: \n", currentUserName);
     StringBuilder messageBuilder = new StringBuilder(initialBody);
     for (StockEventLineItemDto item : stockEventDto.getLineItems()) {

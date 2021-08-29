@@ -5,7 +5,7 @@ import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventory;
 import org.openlmis.stockmanagement.domain.physicalinventory.PhysicalInventoryLineItem;
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.repository.PhysicalInventoriesRepository;
-import org.openlmis.stockmanagement.util.AuthenticationHelper;
+import org.openlmis.stockmanagement.service.EswatiniUserService;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +29,10 @@ public class EswatiniPhysicalInventoryNotifier {
   private PhysicalInventoriesRepository physicalInventoriesRepository;
 
   @Autowired
-  private AuthenticationHelper authenticationHelper;
+  private EswatiniNotifierService eswatiniNotifierService;
 
   @Autowired
-  private EswatiniNotifierService eswatiniNotifierService;
+  private EswatiniUserService userService;
 
   public void notify(StockEventDto stockEventDto) {
     String message = buildMessage(stockEventDto);
@@ -40,7 +40,8 @@ public class EswatiniPhysicalInventoryNotifier {
   }
 
   private String buildMessage(StockEventDto stockEventDto) {
-    String currentUserName = authenticationHelper.getCurrentUser().getUsername();
+    String currentUserName = userService.getCurrentUserName(stockEventDto);
+
     String initialBody = String.format("User %s has made following stock adjustments: \n", currentUserName);
     StringBuilder messageBuilder = new StringBuilder(initialBody);
     UUID resourceId = stockEventDto.getResourceId();
