@@ -14,7 +14,7 @@ import java.util.UUID;
 public class EswatiniUserService extends BaseReferenceDataService<UserDto> {
 
     private static final XLogger XLOGGER = XLoggerFactory.getXLogger(
-            EswatiniStockAdjustmentNotifier.class);
+            EswatiniUserService.class);
 
     @Override
     protected String getUrl() {
