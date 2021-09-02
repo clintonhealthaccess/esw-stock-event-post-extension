@@ -43,7 +43,7 @@ public class EswatiniScheduledNotifier {
     @Autowired
     private EswatiniProcessingPeriodService processingPeriodService;
 
-    @Scheduled(cron = "0 0/1 * 1/1 * ? *", zone = "${time.zoneId}")
+    @Scheduled(cron = "*/10 * * * * *", zone = "${time.zoneId}")
     public void remindToDoPhysicalCounting() {
         try {
             if (counter <= 5) {
