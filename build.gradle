@@ -53,6 +53,13 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok"
     compile "org.openlmis:openlmis-fulfillment:9.0.2-SNAPSHOT:exec"
     compile "org.openlmis:openlmis-stockmanagement:5.1.4-SNAPSHOT:exec"
+    testImplementation "org.mockito:mockito-core:3.+"
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 bootJar {

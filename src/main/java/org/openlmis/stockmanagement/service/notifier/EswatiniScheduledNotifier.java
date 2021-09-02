@@ -26,8 +26,8 @@ public class EswatiniScheduledNotifier {
     private static final XLogger XLOGGER = XLoggerFactory.getXLogger(EswatiniScheduledNotifier.class);
     private static final String REQUIRED_ROLE_NAME = "Stock Manager";
 
-    @Value("${time.zoneId}")
-    private String timeZoneId;
+    @Value("${physicalCount.reminder.daysBefore}")
+    private int daysBeforeConfig;
 
     @Autowired
     private EswatiniUserService userService;
@@ -44,32 +44,39 @@ public class EswatiniScheduledNotifier {
     private EswatiniProcessingPeriodService processingPeriodService;
 
     @Scheduled(cron = "*/10 * * * * *", zone = "${time.zoneId}")
-    public void remindToDoPhysicalCounting() {
-        try {
-            if (counter <= 5) {
-                XLOGGER.debug("remindToDoPhysicalCounting, Counter: {}", counter);
+    public void cronJob() {
+        LocalDate currentDate = LocalDate.now();
+        remindToDoPhysicalCounting(currentDate, daysBeforeConfig);
+    }
 
-                Page<UserDto> userDtos = userService.getPage(RequestParameters.init());
-                for (UserDto user : userDtos) {
-                    Collection<RoleAssignmentDto> roleAssignments = roleAssignmentService.getRoleAssignments(user.getId());
-                    boolean roleMatches = roleAssignments.stream()
-                            .anyMatch(roleAssignmentDto -> REQUIRED_ROLE_NAME.equals(roleAssignmentDto.getRole().getName()));
-                    if (roleMatches) {
-                        ProcessingPeriodDto processingPeriod = getProcessingPeriod(LocalDate.now());
-                        XLOGGER.debug("Sending the reminder mail to {}, ProcessingPeriod {}", user.getUsername(), processingPeriod);
-                        notificationService.notify(user,
-                                "Reminder to perform physical count and report for " + processingPeriod.getDescription(),
-                                "Please perform physical count and report");
-                    } else {
-                        XLOGGER.debug("Not sending the reminder mail to {} because they does not have the role {}", user.getUsername(), REQUIRED_ROLE_NAME);
-                    }
+    protected void remindToDoPhysicalCounting(LocalDate currentDate, int daysBefore) {
+        if (correctTimeToNotify(currentDate, daysBefore)) {
+            XLOGGER.debug("remindToDoPhysicalCounting, Counter: {}", counter);
+
+            Page<UserDto> userDtos = userService.getPage(RequestParameters.init());
+            for (UserDto user : userDtos) {
+                Collection<RoleAssignmentDto> roleAssignments = roleAssignmentService.getRoleAssignments(user.getId());
+                boolean roleMatches = roleAssignments.stream()
+                        .anyMatch(roleAssignmentDto -> REQUIRED_ROLE_NAME.equals(roleAssignmentDto.getRole().getName()));
+                if (roleMatches) {
+                    ProcessingPeriodDto processingPeriod = getProcessingPeriod(currentDate);
+                    XLOGGER.debug("Sending the reminder mail to {}, ProcessingPeriod {}", user.getUsername(), processingPeriod);
+                    notificationService.notify(user,
+                            "Reminder to perform physical count and report for " + processingPeriod.getDescription(),
+                            "Please perform physical count and report");
+                } else {
+                    XLOGGER.debug("Not sending the reminder mail to {} because they does not have the role {}", user.getUsername(), REQUIRED_ROLE_NAME);
                 }
-
             }
-        } finally {
-            counter++;
-        }
 
+        }
+    }
+
+    private boolean correctTimeToNotify(LocalDate currentDate, int daysBefore) {
+        int lengthOfMonth = currentDate.lengthOfMonth();
+        int currentDayOfMonth = currentDate.getDayOfMonth();
+        return currentDayOfMonth == lengthOfMonth ||
+                currentDayOfMonth == lengthOfMonth - daysBefore;
     }
 
     public ProcessingPeriodDto getProcessingPeriod(LocalDate currentDate) {
