@@ -17,6 +17,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -28,6 +29,9 @@ public class EswatiniScheduledNotifier {
 
     @Value("${physicalCount.reminder.daysBefore}")
     private int daysBeforeConfig;
+
+    @Value("${time.zoneId}")
+    private String timeZoneId;
 
     @Autowired
     private EswatiniUserService userService;
@@ -43,9 +47,9 @@ public class EswatiniScheduledNotifier {
     @Autowired
     private EswatiniProcessingPeriodService processingPeriodService;
 
-    @Scheduled(cron = "*/10 * * * * *", zone = "${time.zoneId}")
+    @Scheduled(cron = "${physicalCount.reminder.cron}", zone = "${time.zoneId}")
     public void cronJob() {
-        LocalDate currentDate = LocalDate.now();
+        LocalDate currentDate = LocalDate.now(ZoneId.of(timeZoneId));
         remindToDoPhysicalCounting(currentDate, daysBeforeConfig);
     }
 
