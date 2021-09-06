@@ -2,7 +2,6 @@ package org.openlmis.stockmanagement.service;
 
 import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
-import org.openlmis.stockmanagement.service.notifier.EswatiniStockAdjustmentNotifier;
 import org.openlmis.stockmanagement.service.referencedata.BaseReferenceDataService;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;

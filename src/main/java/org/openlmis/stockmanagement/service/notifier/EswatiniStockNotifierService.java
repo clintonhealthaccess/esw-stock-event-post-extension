@@ -19,7 +19,7 @@ import java.util.UUID;
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_INVENTORIES_EDIT;
 
 @Service
-public class EswatiniNotifierService {
+public class EswatiniStockNotifierService {
 
     private static final XLogger XLOGGER = XLoggerFactory.getXLogger(
             EswatiniStockAdjustmentNotifier.class);
@@ -31,7 +31,7 @@ public class EswatiniNotifierService {
     private SupervisingUsersReferenceDataService supervisingUsersReferenceDataService;
 
     @Autowired
-    private StockCardNotifier stockCardNotifier;
+    private EswatiniStockCardNotifier stockCardNotifier;
 
     @Autowired
     private RightReferenceDataService rightReferenceDataService;
@@ -43,20 +43,20 @@ public class EswatiniNotifierService {
         RightDto rightDto = rightReferenceDataService.findRight(STOCK_INVENTORIES_EDIT);
         UUID programId = stockEventDto.getProgramId();
         UUID facilityId = stockEventDto.getFacilityId();
+        String programName = stockCardNotifier.getProgramName(programId);
+        String facilityName = stockCardNotifier.getFacilityName(facilityId);
 
         Collection<UserDto> recipients = getEditors(programId, facilityId, rightDto.getId());
 
         for (UserDto recipient : recipients) {
             XLOGGER.debug("Recipient username = {}", recipient.getUsername());
-            String programName = stockCardNotifier.getProgramName(programId);
-            String facilityName = stockCardNotifier.getFacilityName(facilityId);
             String subject = String.format("Stock for %s - %s  has been adjusted", facilityName, programName);
             notificationService.notify(recipient,
                     subject, message);
         }
     }
 
-    private Collection<UserDto> getEditors(UUID programId, UUID facilityId, UUID rightId) {
+    public Collection<UserDto> getEditors(UUID programId, UUID facilityId, UUID rightId) {
         SupervisoryNodeDto supervisoryNode = supervisoryNodeReferenceDataService
                 .findSupervisoryNode(programId, facilityId);
 

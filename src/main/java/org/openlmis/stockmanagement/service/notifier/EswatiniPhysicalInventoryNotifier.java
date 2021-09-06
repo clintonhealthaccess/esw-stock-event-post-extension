@@ -23,13 +23,13 @@ public class EswatiniPhysicalInventoryNotifier {
           EswatiniPhysicalInventoryNotifier.class);
 
   @Autowired
-  private StockCardNotifier stockCardNotifier;
+  private EswatiniStockCardNotifier stockCardNotifier;
 
   @Autowired
   private PhysicalInventoriesRepository physicalInventoriesRepository;
 
   @Autowired
-  private EswatiniNotifierService eswatiniNotifierService;
+  private EswatiniStockNotifierService eswatiniNotifierService;
 
   @Autowired
   private EswatiniUserService userService;

@@ -1,6 +1,5 @@
 package org.openlmis.stockmanagement.service.notifier;
 
-import org.apache.commons.lang.text.StrSubstitutor;
 import org.openlmis.stockmanagement.domain.card.StockCard;
 import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.domain.identity.OrderableLotIdentity;
@@ -8,14 +7,9 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.dto.StockEventLineItemDto;
 import org.openlmis.stockmanagement.dto.referencedata.LotDto;
 import org.openlmis.stockmanagement.dto.referencedata.RightDto;
-import org.openlmis.stockmanagement.dto.referencedata.SupervisoryNodeDto;
-import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.i18n.MessageService;
-import org.openlmis.stockmanagement.service.notification.NotificationService;
 import org.openlmis.stockmanagement.service.referencedata.LotReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.RightReferenceDataService;
-import org.openlmis.stockmanagement.service.referencedata.SupervisingUsersReferenceDataService;
-import org.openlmis.stockmanagement.service.referencedata.SupervisoryNodeReferenceDataService;
 import org.openlmis.stockmanagement.util.Message;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
@@ -27,7 +21,10 @@ import org.springframework.stereotype.Component;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static org.openlmis.stockmanagement.i18n.MessageKeys.NOTIFICATION_STOCKOUT_CONTENT;
 import static org.openlmis.stockmanagement.i18n.MessageKeys.NOTIFICATION_STOCKOUT_SUBJECT;
@@ -40,7 +37,7 @@ public class EswatiniStockoutNotifier {
           EswatiniStockoutNotifier.class);
 
   @Autowired
-  private StockCardNotifier stockCardNotifier;
+  private EswatiniStockCardNotifier stockCardNotifier;
 
   @Autowired
   private RightReferenceDataService rightReferenceDataService;
@@ -51,17 +48,8 @@ public class EswatiniStockoutNotifier {
   @Autowired
   private MessageService messageService;
 
-  @Autowired
-  private SupervisoryNodeReferenceDataService supervisoryNodeReferenceDataService;
-
-  @Autowired
-  private SupervisingUsersReferenceDataService supervisingUsersReferenceDataService;
-
   @Value("${email.urlToInitiateRequisition}")
   private String urlToInitiateRequisition;
-
-  @Autowired
-  private NotificationService notificationService;
 
 
   @Async
@@ -79,46 +67,12 @@ public class EswatiniStockoutNotifier {
     StockCard stockCard = event.getContext().findCard(identity);
 
     if (stockCard.getStockOnHand() == 0) {
-      notifyStockEditors(stockCard, rightId);
+      NotificationMessageParams params = new NotificationMessageParams(
+              getMessage(NOTIFICATION_STOCKOUT_SUBJECT),
+              getMessage(NOTIFICATION_STOCKOUT_CONTENT),
+              constructSubstitutionMap(stockCard));
+      stockCardNotifier.notifyStockEditors(stockCard, rightId, params);
     }
-  }
-
-  private void notifyStockEditors(StockCard stockCard, UUID rightId) {
-    NotificationMessageParams params = new NotificationMessageParams(
-            getMessage(NOTIFICATION_STOCKOUT_SUBJECT),
-            getMessage(NOTIFICATION_STOCKOUT_CONTENT),
-            constructSubstitutionMap(stockCard));
-    Collection<UserDto> recipients = getEditors(stockCard.getProgramId(), stockCard.getFacilityId(), rightId);
-
-    Map<String, String> valuesMap = params.getSubstitutionMap();
-    StrSubstitutor sub = new StrSubstitutor(valuesMap);
-
-    for (UserDto recipient : recipients) {
-        valuesMap.put("username", recipient.getUsername());
-        XLOGGER.debug("Recipient username = {}", recipient.getUsername());
-        notificationService.notify(recipient,
-                sub.replace(params.getMessageSubject()), sub.replace(params.getMessageContent()));
-    }
-  }
-
-  private Collection<UserDto> getEditors(UUID programId, UUID facilityId, UUID rightId) {
-    SupervisoryNodeDto supervisoryNode = supervisoryNodeReferenceDataService
-            .findSupervisoryNode(programId, facilityId);
-
-    if (supervisoryNode == null) {
-      throw new IllegalArgumentException(
-              String.format("There is no supervisory node for program %s and facility %s",
-                      programId, facilityId));
-    }
-
-    XLOGGER.debug("Supervisory node ID = {}", supervisoryNode.getId());
-    XLOGGER.debug("Searching for supervising users with node ID = {} rightid = {} programId = {}",
-            supervisoryNode.getId(),
-            rightId,
-            programId);
-
-    return supervisingUsersReferenceDataService
-            .findAll(supervisoryNode.getId(), rightId, programId);
   }
 
   private Map<String, String> constructSubstitutionMap(StockCard stockCard) {
@@ -163,6 +117,4 @@ public class EswatiniStockoutNotifier {
             .localize(new Message(key))
             .getMessage();
   }
-
-
 }

@@ -27,7 +27,7 @@ public class EswatiniStockAdjustmentNotifier {
           EswatiniStockAdjustmentNotifier.class);
 
   @Autowired
-  private StockCardNotifier stockCardNotifier;
+  private EswatiniStockCardNotifier stockCardNotifier;
 
   @Autowired
   private EswatiniUserService eswatiniUserService;
@@ -39,7 +39,7 @@ public class EswatiniStockAdjustmentNotifier {
   private StockCardRepository stockCardRepository;
 
   @Autowired
-  private EswatiniNotifierService eswatiniNotifierService;
+  private EswatiniStockNotifierService eswatiniNotifierService;
 
   public void notify(StockEventDto stockEventDto) {
     String message = buildMessage(stockEventDto);
