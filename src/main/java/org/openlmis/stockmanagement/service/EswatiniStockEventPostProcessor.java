@@ -4,6 +4,7 @@ import org.openlmis.stockmanagement.dto.StockEventDto;
 import org.openlmis.stockmanagement.extension.point.StockEventPostProcessor;
 import org.openlmis.stockmanagement.service.notifier.EswatiniPhysicalInventoryNotifier;
 import org.openlmis.stockmanagement.service.notifier.EswatiniStockAdjustmentNotifier;
+import org.openlmis.stockmanagement.service.notifier.EswatiniStockoutNotifier;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,9 @@ public class EswatiniStockEventPostProcessor implements StockEventPostProcessor 
   @Autowired
   private EswatiniStockAdjustmentNotifier eswatiniStockAdjustmentNotifier;
 
+  @Autowired
+  private EswatiniStockoutNotifier eswatiniStockoutNotifier;
+
   @Override
   public void process(StockEventDto stockEventDto) {
     XLOGGER.debug("EswatiniStockEventPostProcessor init");
@@ -40,5 +44,6 @@ public class EswatiniStockEventPostProcessor implements StockEventPostProcessor 
     } else {
       XLOGGER.debug("Skip notifying for client only api call");
     }
+    eswatiniStockoutNotifier.notify(stockEventDto);
   }
 }
