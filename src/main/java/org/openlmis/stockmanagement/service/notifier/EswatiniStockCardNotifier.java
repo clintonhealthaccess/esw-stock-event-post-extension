@@ -36,12 +36,10 @@ public class EswatiniStockCardNotifier extends BaseNotifier {
     StrSubstitutor sub = new StrSubstitutor(valuesMap);
 
     for (UserDto recipient : recipients) {
-      if (stockCard.getFacilityId().equals(recipient.getHomeFacilityId())) {
         valuesMap.put("username", recipient.getUsername());
         XLOGGER.debug("Recipient username = {}", recipient.getUsername());
         notificationService.notify(recipient,
                 sub.replace(params.getMessageSubject()), sub.replace(params.getMessageContent()));
-      }
     }
   }
 }
