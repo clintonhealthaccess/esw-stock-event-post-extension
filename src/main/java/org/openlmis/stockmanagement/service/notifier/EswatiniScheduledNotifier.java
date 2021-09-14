@@ -64,12 +64,18 @@ public class EswatiniScheduledNotifier {
                         .anyMatch(roleAssignmentDto -> REQUIRED_ROLE_NAME.equals(roleAssignmentDto.getRole().getName()));
                 if (roleMatches) {
                     ProcessingPeriodDto processingPeriod = getProcessingPeriod(currentDate);
-                    XLOGGER.debug("Sending the reminder mail to {}, ProcessingPeriod {}", user.getUsername(), processingPeriod);
+                    XLOGGER.debug("Sending the reminder mail to {}, ProcessingPeriod {}",
+                            user.getUsername(),
+                            processingPeriod);
                     notificationService.notify(user,
-                            "Reminder to perform physical count and report for " + processingPeriod.getDescription(),
-                            "Please perform physical count and report");
+                            String.format("Reminder to perform physical count and report for %s",
+                                    processingPeriod.getDescription()),
+                            String.format("You need to do physical counts for requisitions that are due for the period %s.",
+                                    processingPeriod.getDescription()));
                 } else {
-                    XLOGGER.debug("Not sending the reminder mail to {} because they does not have the role {}", user.getUsername(), REQUIRED_ROLE_NAME);
+                    XLOGGER.debug("Not sending the reminder mail to {} because they does not have the role {}",
+                            user.getUsername(),
+                            REQUIRED_ROLE_NAME);
                 }
             }
 
