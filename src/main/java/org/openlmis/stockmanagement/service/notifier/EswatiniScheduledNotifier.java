@@ -49,6 +49,7 @@ public class EswatiniScheduledNotifier {
 
     @Scheduled(cron = "${physicalCount.reminder.cron}", zone = "${time.zoneId}")
     public void cronJob() {
+        XLOGGER.debug("Starting physicalCount reminder cron job");
         LocalDate currentDate = LocalDate.now(ZoneId.of(timeZoneId));
         remindToDoPhysicalCounting(currentDate, daysBeforeConfig);
     }
