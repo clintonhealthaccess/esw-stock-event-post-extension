@@ -8,7 +8,7 @@ import org.openlmis.stockmanagement.dto.referencedata.RoleDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.service.EswatiniRoleAssignmentService;
 import org.openlmis.stockmanagement.service.EswatiniUserService;
-import org.openlmis.stockmanagement.service.dtos.ProcessingPeriodDto;
+import org.openlmis.stockmanagement.service.dtos.EswatiniProcessingPeriodDto;
 import org.openlmis.stockmanagement.service.notification.NotificationService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -67,7 +67,7 @@ class EswatiniScheduledNotifierTest {
         Collection<RoleAssignmentDto> roleAssignmentDtos = new ArrayList<>();
         roleAssignmentDtos.add(roleAssignmentDto);
         Page<UserDto> userDtos = new PageImpl<>(users);
-        ProcessingPeriodDto processingPeriodDto = new ProcessingPeriodDto();
+        EswatiniProcessingPeriodDto processingPeriodDto = new EswatiniProcessingPeriodDto();
         Mockito.when(userService.getPage(any())).thenReturn(userDtos);
         Mockito.when(roleAssignmentService.getRoleAssignments(any())).thenReturn(roleAssignmentDtos);
         doReturn(processingPeriodDto).when(notifier).getProcessingPeriod(any());

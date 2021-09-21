@@ -3,7 +3,7 @@ package org.openlmis.stockmanagement.service.dtos;
 import java.time.LocalDate;
 import java.util.Map;
 
-public class ProcessingPeriodDto {
+public class EswatiniProcessingPeriodDto {
     private String id;
     private String name;
     private String description;

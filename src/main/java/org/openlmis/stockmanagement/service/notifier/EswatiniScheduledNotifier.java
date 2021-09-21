@@ -5,7 +5,7 @@ import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.service.EswatiniProcessingPeriodService;
 import org.openlmis.stockmanagement.service.EswatiniRoleAssignmentService;
 import org.openlmis.stockmanagement.service.EswatiniUserService;
-import org.openlmis.stockmanagement.service.dtos.ProcessingPeriodDto;
+import org.openlmis.stockmanagement.service.dtos.EswatiniProcessingPeriodDto;
 import org.openlmis.stockmanagement.service.notification.NotificationService;
 import org.openlmis.stockmanagement.util.RequestParameters;
 import org.slf4j.ext.XLogger;
@@ -64,7 +64,7 @@ public class EswatiniScheduledNotifier {
                 boolean roleMatches = roleAssignments.stream()
                         .anyMatch(roleAssignmentDto -> REQUIRED_ROLE_NAME.equals(roleAssignmentDto.getRole().getName()));
                 if (roleMatches) {
-                    ProcessingPeriodDto processingPeriod = getProcessingPeriod(currentDate);
+                    EswatiniProcessingPeriodDto processingPeriod = getProcessingPeriod(currentDate);
                     XLOGGER.debug("Sending the reminder mail to {}, ProcessingPeriod {}",
                             user.getUsername(),
                             processingPeriod);
@@ -90,11 +90,10 @@ public class EswatiniScheduledNotifier {
                 currentDayOfMonth == lengthOfMonth - daysBefore;
     }
 
-    public ProcessingPeriodDto getProcessingPeriod(LocalDate currentDate) {
-        Page<ProcessingPeriodDto> page = processingPeriodService.getPage(RequestParameters.init());
-        Optional<ProcessingPeriodDto> first = page.stream().filter(dto -> isWithinRange(currentDate, dto.getStartDate(), dto.getEndDate())).findFirst();
-        ProcessingPeriodDto periodDto = first.orElseThrow(() -> new RuntimeException("Processing Period not found"));
-        return periodDto;
+    public EswatiniProcessingPeriodDto getProcessingPeriod(LocalDate currentDate) {
+        Page<EswatiniProcessingPeriodDto> page = processingPeriodService.getPage(RequestParameters.init());
+        Optional<EswatiniProcessingPeriodDto> first = page.stream().filter(dto -> isWithinRange(currentDate, dto.getStartDate(), dto.getEndDate())).findFirst();
+        return first.orElseThrow(() -> new RuntimeException("Processing Period not found"));
     }
 
     boolean isWithinRange(LocalDate testDate, LocalDate startDate, LocalDate endDate) {
