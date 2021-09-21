@@ -97,7 +97,10 @@ public class EswatiniAMCNotifier {
 
     EswatiniProcessingPeriodDto getProcessingPeriod(LocalDate currentDate) {
         Page<EswatiniProcessingPeriodDto> page = processingPeriodService.getPage(RequestParameters.init());
-        Optional<EswatiniProcessingPeriodDto> first = page.stream().filter(dto -> isWithinRange(currentDate, dto.getStartDate(), dto.getEndDate())).findFirst();
+        List<EswatiniProcessingPeriodDto> processingPeriodDtos = page.toList();
+        Optional<EswatiniProcessingPeriodDto> first = processingPeriodDtos.stream()
+                .filter(dto -> dto.getDurationInMonths() == 1)
+                .filter(dto -> isWithinRange(currentDate, dto.getStartDate(), dto.getEndDate())).findFirst();
         return first.orElseThrow(() -> new RuntimeException("Processing Period not found"));
     }
 
