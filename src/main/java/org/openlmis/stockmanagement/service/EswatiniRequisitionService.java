@@ -15,13 +15,11 @@
 package org.openlmis.stockmanagement.service;
 
 import org.openlmis.stockmanagement.service.dtos.EswatiniRequisitionDto;
-import org.openlmis.stockmanagement.service.dtos.EswatiniStatusLogEntryDto;
 import org.openlmis.stockmanagement.util.RequestParameters;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,14 +41,22 @@ public class EswatiniRequisitionService extends EswatiniBaseRequisitionService<E
     }
 
     public List<EswatiniRequisitionDto> searchAndFilter(RequestParameters parameters) {
-        List<EswatiniRequisitionDto> requisitions = getPage("search", parameters, null, HttpMethod.GET, getResultClass()).getContent();
-        return filter(requisitions);
+        List<EswatiniRequisitionDto> requisitions = getPage("search",
+                parameters,
+                null,
+                HttpMethod.GET,
+                getResultClass()).getContent();
+        return requisitions.stream()
+                .filter(this::isSubmitted)
+                .map(this::convertToFull)
+                .collect(Collectors.toList());
     }
 
-    List<EswatiniRequisitionDto> filter(List<EswatiniRequisitionDto> requisitions) {
-        return requisitions.stream().filter(r -> {
-            Map<String, EswatiniStatusLogEntryDto> statusChanges = r.getStatusChanges();
-            return statusChanges.containsKey("SUBMITTED");
-        }).collect(Collectors.toList());
+    private boolean isSubmitted(EswatiniRequisitionDto eswatiniRequisitionDto) {
+        return eswatiniRequisitionDto.getStatusChanges().containsKey("SUBMITTED");
+    }
+
+    public EswatiniRequisitionDto convertToFull(EswatiniRequisitionDto eswatiniRequisitionDto) {
+        return findOne(eswatiniRequisitionDto.getId());
     }
 }

@@ -17,6 +17,7 @@ package org.openlmis.stockmanagement.service.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -26,6 +27,7 @@ public class EswatiniRequisitionDto {
   private Map<String, EswatiniStatusLogEntryDto> statusChanges;
   private EswatiniIdHolderDto program;
   private EswatiniIdHolderDto facility;
+  private List<EswatiniRequisitionLineItemDto> requisitionLineItems;
 
   public UUID getId() {
     return id;
@@ -59,6 +61,14 @@ public class EswatiniRequisitionDto {
     this.facility = facility;
   }
 
+  public List<EswatiniRequisitionLineItemDto> getRequisitionLineItems() {
+    return requisitionLineItems;
+  }
+
+  public void setRequisitionLineItems(List<EswatiniRequisitionLineItemDto> requisitionLineItems) {
+    this.requisitionLineItems = requisitionLineItems;
+  }
+
   @Override
   public String toString() {
     return "EswatiniRequisitionDto{" +
@@ -66,6 +76,7 @@ public class EswatiniRequisitionDto {
             ", statusChanges=" + statusChanges +
             ", program=" + program +
             ", facility=" + facility +
+            ", requisitionLineItems=" + requisitionLineItems +
             '}';
   }
 }
