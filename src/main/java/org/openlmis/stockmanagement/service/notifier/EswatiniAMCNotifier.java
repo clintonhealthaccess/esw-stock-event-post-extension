@@ -86,7 +86,7 @@ public class EswatiniAMCNotifier {
                 compareAndSendAlert(r, pastReqMinusOne, pastReqMinusTwo);
             }
         } catch(RuntimeException runtimeException) {
-            XLOGGER.debug("Error sending amc alert", runtimeException.getCause());
+            XLOGGER.error("Error sending amc alert", runtimeException);
         }
     }
 
