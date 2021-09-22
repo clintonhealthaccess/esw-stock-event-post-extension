@@ -22,6 +22,7 @@ import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.openlmis.stockmanagement.service.PermissionService.STOCK_INVENTORIES_EDIT;
 
@@ -93,28 +94,29 @@ public class EswatiniAMCNotifier {
     private void compareAndSendAlert(EswatiniRequisitionDto r,
                                      EswatiniRequisitionDto pastReqMinusOne,
                                      EswatiniRequisitionDto pastReqMinusTwo) {
-        for(EswatiniRequisitionLineItemDto lineItem : r.getRequisitionLineItems()) {
+        List<EswatiniRequisitionLineItemDto> lineItemsWithAvgConsumption = r.getRequisitionLineItems().stream()
+                .filter(l -> l.getAverageConsumption() != null)
+                .collect(Collectors.toList());
+        for(EswatiniRequisitionLineItemDto lineItem : lineItemsWithAvgConsumption) {
             EswatiniRequisitionLineItemDto pastMinusOneLineItem = matchingLineItem(lineItem, pastReqMinusOne);
             EswatiniRequisitionLineItemDto pastMinusTwoLineItem = matchingLineItem(lineItem, pastReqMinusTwo);
-            XLOGGER.debug("Average consumption for product id {} r {} r-1 {} r-2 {}",
-                    lineItem.getOrderable().getId(),
-                    lineItem.getAverageConsumption(),
-                    pastMinusOneLineItem.getAverageConsumption(),
-                    pastMinusTwoLineItem.getAverageConsumption());
-            if (lineItem.getAverageConsumption() < pastMinusOneLineItem.getAverageConsumption()
-                    && lineItem.getAverageConsumption() < pastMinusTwoLineItem.getAverageConsumption()) {
-                RightDto right = rightReferenceDataService.findRight(STOCK_INVENTORIES_EDIT);
-                Collection<UserDto> editors = stockNotifierService.getEditors(r.getFacility().getId(),
-                        r.getFacility().getId(),
-                        right.getId());
-                for (UserDto editor : editors) {
-                    String subject = String.format("AMC is lower");
-                    String body = String.format("AMC is lower for %s", stockCardNotifier.getOrderableName(lineItem.getOrderable().getId()));
-                    XLOGGER.debug("Sending mail, user: {} subject: {} body: {}",
-                            editor.getUsername(),
-                            subject,
-                            body);
-                    notificationService.notify(editor, subject, body);
+            XLOGGER.debug("lineitem {} lineitem-1 {} lineitem-2 {}", lineItem, pastMinusOneLineItem, pastMinusTwoLineItem);
+            if (pastMinusOneLineItem != null && pastMinusTwoLineItem != null) {
+                if (lineItem.getAverageConsumption() < pastMinusOneLineItem.getAverageConsumption()
+                        && lineItem.getAverageConsumption() < pastMinusTwoLineItem.getAverageConsumption()) {
+                    RightDto right = rightReferenceDataService.findRight(STOCK_INVENTORIES_EDIT);
+                    Collection<UserDto> editors = stockNotifierService.getEditors(r.getFacility().getId(),
+                            r.getFacility().getId(),
+                            right.getId());
+                    for (UserDto editor : editors) {
+                        String subject = String.format("AMC is lower");
+                        String body = String.format("AMC is lower for %s", stockCardNotifier.getOrderableName(lineItem.getOrderable().getId()));
+                        XLOGGER.debug("Sending mail, user: {} subject: {} body: {}",
+                                editor.getUsername(),
+                                subject,
+                                body);
+                        notificationService.notify(editor, subject, body);
+                    }
                 }
             }
         }
@@ -124,9 +126,10 @@ public class EswatiniAMCNotifier {
     private EswatiniRequisitionLineItemDto matchingLineItem(EswatiniRequisitionLineItemDto lineItem,
                                                             EswatiniRequisitionDto requisition) {
         return requisition.getRequisitionLineItems().stream()
+                .filter(l -> l.getAverageConsumption() != null)
                 .filter(l -> l.getOrderable().getId().equals(lineItem.getOrderable().getId()))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("matching line item not found"));
+                .orElse(null);
     }
 
     private RequestParameters getSearchParams(EswatiniProcessingPeriodDto processingPeriod) {
