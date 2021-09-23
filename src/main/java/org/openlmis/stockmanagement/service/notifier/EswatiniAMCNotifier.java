@@ -117,8 +117,9 @@ public class EswatiniAMCNotifier {
             EswatiniRequisitionLineItemDto minusTwoLineItem = matchingLineItem(lineItem, pastReqMinusTwo);
             XLOGGER.debug("lineitem {} lineitem-1 {} lineitem-2 {}", lineItem, minusOneLineItem, minusTwoLineItem);
             if (minusOneLineItem != null && minusTwoLineItem != null
-                    && lineItem.getAverageConsumption() < minusOneLineItem.getAverageConsumption()
-                    && lineItem.getAverageConsumption() < minusTwoLineItem.getAverageConsumption()) {
+//                    && lineItem.getAverageConsumption() < minusOneLineItem.getAverageConsumption()
+//                    && lineItem.getAverageConsumption() < minusTwoLineItem.getAverageConsumption()
+            ) {
                 lineItemsWithLowerAMC.add(Arrays.asList(lineItem, minusOneLineItem, minusTwoLineItem));
             }
         }
