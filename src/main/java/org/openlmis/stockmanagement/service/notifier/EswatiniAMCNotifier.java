@@ -127,20 +127,22 @@ public class EswatiniAMCNotifier {
             }
         }
 
-        RightDto right = rightReferenceDataService.findRight(REQUISITION_VIEW);
-        Collection<UserDto> editors = stockNotifierService.getEditors(r.getProgram().getId(),
-                r.getFacility().getId(),
-                right.getId());
-        for (UserDto editor : editors) {
-            Map<String, String> substitutionMap = constructSubstitutionMap(r, editor, lineItemsWithLowerAMC, processingPeriods);
-            StrSubstitutor strSubstitutor = new StrSubstitutor(substitutionMap);
-            String subject = strSubstitutor.replace(eswMessageService.getMessage(AMC_EMAIL_ALERT_SUBJECT));
-            String body = strSubstitutor.replace(eswMessageService.getMessage(AMC_EMAIL_ALERT_BODY));
-            XLOGGER.debug("Sending mail, user: {} subject: {} body: {}",
-                    editor.getUsername(),
-                    subject,
-                    body);
-            notificationService.notify(editor, subject, body);
+        if(lineItemsWithLowerAMC.size() > 0) {
+            RightDto right = rightReferenceDataService.findRight(REQUISITION_VIEW);
+            Collection<UserDto> editors = stockNotifierService.getEditors(r.getProgram().getId(),
+                    r.getFacility().getId(),
+                    right.getId());
+            for (UserDto editor : editors) {
+                Map<String, String> substitutionMap = constructSubstitutionMap(r, editor, lineItemsWithLowerAMC, processingPeriods);
+                StrSubstitutor strSubstitutor = new StrSubstitutor(substitutionMap);
+                String subject = strSubstitutor.replace(eswMessageService.getMessage(AMC_EMAIL_ALERT_SUBJECT));
+                String body = strSubstitutor.replace(eswMessageService.getMessage(AMC_EMAIL_ALERT_BODY));
+                XLOGGER.debug("Sending mail, user: {} subject: {} body: {}",
+                        editor.getUsername(),
+                        subject,
+                        body);
+                notificationService.notify(editor, subject, body);
+            }
         }
 
     }
