@@ -1,9 +1,6 @@
 package org.openlmis.stockmanagement.service.notifier;
 
 import org.apache.commons.lang.text.StrSubstitutor;
-import org.apache.commons.lang3.tuple.Triple;
-import org.openlmis.stockmanagement.domain.card.StockCard;
-import org.openlmis.stockmanagement.domain.card.StockCardLineItem;
 import org.openlmis.stockmanagement.dto.referencedata.RightDto;
 import org.openlmis.stockmanagement.dto.referencedata.UserDto;
 import org.openlmis.stockmanagement.service.EswMessageService;
@@ -19,7 +16,6 @@ import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -28,8 +24,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.openlmis.stockmanagement.service.PermissionService.STOCK_INVENTORIES_EDIT;
 
 @Component
 public class EswatiniAMCNotifier {
@@ -78,9 +72,7 @@ public class EswatiniAMCNotifier {
     @Scheduled(cron = "${amc.alert.cron}", zone = "${time.zoneId}")
     public void cronJob() {
         XLOGGER.debug("INIT amcAlertCron");
-        LocalDate currentDate = LocalDate.now(ZoneId.of(timeZoneId));
-        LocalDate d = LocalDate.of(2017, 5, 1);
-        sendAMCAlert(d);
+        sendAMCAlert(LocalDate.now(ZoneId.of(timeZoneId)));
     }
 
     private void sendAMCAlert(LocalDate currentDate) {
