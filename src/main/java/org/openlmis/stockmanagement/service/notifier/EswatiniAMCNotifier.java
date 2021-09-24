@@ -125,7 +125,7 @@ public class EswatiniAMCNotifier {
         }
 
         RightDto right = rightReferenceDataService.findRight(STOCK_INVENTORIES_EDIT);
-        Collection<UserDto> editors = stockNotifierService.getEditors(r.getFacility().getId(),
+        Collection<UserDto> editors = stockNotifierService.getEditors(r.getProgram().getId(),
                 r.getFacility().getId(),
                 right.getId());
         for (UserDto editor : editors) {
