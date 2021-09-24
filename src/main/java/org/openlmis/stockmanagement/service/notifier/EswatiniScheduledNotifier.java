@@ -71,9 +71,9 @@ public class EswatiniScheduledNotifier {
                             processingPeriod);
                     notificationService.notify(user,
                             String.format("Reminder to perform physical count and report for %s",
-                                    processingPeriod.getDescription()),
+                                    processingPeriod.getName()),
                             String.format("You need to do physical counts for requisitions that are due for the period %s.",
-                                    processingPeriod.getDescription()));
+                                    processingPeriod.getName()));
                 } else {
                     XLOGGER.debug("Not sending the reminder mail to {} because they does not have the role {}",
                             user.getUsername(),

@@ -153,7 +153,7 @@ public class EswatiniAMCNotifier {
                                                          List<EswatiniProcessingPeriodDto> processingPeriods) {
         Map<String, String> valueMap = new HashMap<>();
         valueMap.put("username", user.getUsername());
-        valueMap.put("currentProcessingPeriodDescription", processingPeriods.get(0).getDescription());
+        valueMap.put("currentProcessingPeriodName", processingPeriods.get(0).getName());
         valueMap.put("programName", stockCardNotifier.getProgramName(requisition.getProgram().getId()));
         valueMap.put("facilityName", stockCardNotifier.getFacilityName(requisition.getFacility().getId()));
         valueMap.put("lineItemsBody", constructLineItemsBody(lineItemsWithLowerAMC, processingPeriods));
@@ -176,9 +176,9 @@ public class EswatiniAMCNotifier {
             EswatiniProcessingPeriodDto p2 = processingPeriods.get(2);
             Map<String, Object> valueMap = new HashMap<>();
             valueMap.put("productName", stockCardNotifier.getOrderableName(l0.getOrderable().getId()));
-            valueMap.put("currentProcessingPeriodDescription", p0.getDescription());
-            valueMap.put("minusOneProcessingPeriodDescription", p1.getDescription());
-            valueMap.put("minusTwoProcessingPeriodDescription", p2.getDescription());
+            valueMap.put("currentProcessingPeriodName", p0.getName());
+            valueMap.put("minusOneProcessingPeriodName", p1.getName());
+            valueMap.put("minusTwoProcessingPeriodName", p2.getName());
             valueMap.put("currentProcessingPeriodAMC", l0.getAverageConsumption());
             valueMap.put("minusOneProcessingPeriodAMC", l1.getAverageConsumption());
             valueMap.put("minusTwoProcessingPeriodAMC", l2.getAverageConsumption());
