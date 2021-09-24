@@ -40,6 +40,9 @@ public class EswatiniAMCNotifier {
     private static final String AMC_EMAIL_ALERT_BODY = "amc.email.alert.body";
     private static final String AMC_EMAIL_ALERT_LINEITEM_BODY = "amc.email.alert.lineItem.body";
 
+    public static final String REQUISITION_VIEW = "REQUISITION_VIEW";
+
+
     @Autowired
     private EswatiniProcessingPeriodService processingPeriodService;
 
@@ -124,7 +127,7 @@ public class EswatiniAMCNotifier {
             }
         }
 
-        RightDto right = rightReferenceDataService.findRight(STOCK_INVENTORIES_EDIT);
+        RightDto right = rightReferenceDataService.findRight(REQUISITION_VIEW);
         Collection<UserDto> editors = stockNotifierService.getEditors(r.getProgram().getId(),
                 r.getFacility().getId(),
                 right.getId());
