@@ -155,12 +155,15 @@ public class EswatiniAMCNotifier {
         valueMap.put("programName", stockCardNotifier.getProgramName(requisition.getProgram().getId()));
         valueMap.put("facilityName", stockCardNotifier.getFacilityName(requisition.getFacility().getId()));
         valueMap.put("lineItemsBody", constructLineItemsBody(lineItemsWithLowerAMC, processingPeriods));
+
+        XLOGGER.debug("Values for subject body {}", valueMap);
+
         return valueMap;
     }
 
     private String constructLineItemsBody(List<List<EswatiniRequisitionLineItemDto>> lineItemsWithLowerAMC,
                                           List<EswatiniProcessingPeriodDto> processingPeriods) {
-        StringBuilder lineItemsBuilder = new StringBuilder();
+        StringBuilder messageBuilder = new StringBuilder();
 
         for(List<EswatiniRequisitionLineItemDto> items: lineItemsWithLowerAMC) {
             EswatiniRequisitionLineItemDto l0 = items.get(0);
@@ -177,11 +180,16 @@ public class EswatiniAMCNotifier {
             valueMap.put("currentProcessingPeriodAMC", l0.getAverageConsumption());
             valueMap.put("minusOneProcessingPeriodAMC", l1.getAverageConsumption());
             valueMap.put("minusTwoProcessingPeriodAMC", l2.getAverageConsumption());
+
+            XLOGGER.debug("Values for line item body {}", valueMap);
+
             StrSubstitutor strSubstitutor = new StrSubstitutor(valueMap);
             String lineItemBody = strSubstitutor.replace(eswMessageService.getMessage(AMC_EMAIL_ALERT_LINEITEM_BODY));
-            lineItemsBuilder.append(lineItemBody);
+            messageBuilder.append(lineItemBody);
         }
-        return lineItemsBuilder.toString();
+        String lineItemsBody = messageBuilder.toString();
+        XLOGGER.debug("lineItemsBody is {}", lineItemsBody);
+        return lineItemsBody;
     }
 
     private EswatiniRequisitionLineItemDto matchingLineItem(EswatiniRequisitionLineItemDto lineItem,
