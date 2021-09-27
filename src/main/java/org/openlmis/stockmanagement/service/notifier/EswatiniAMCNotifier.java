@@ -72,7 +72,8 @@ public class EswatiniAMCNotifier {
     @Scheduled(cron = "${amc.alert.cron}", zone = "${time.zoneId}")
     public void cronJob() {
         XLOGGER.debug("INIT amcAlertCron");
-        sendAMCAlert(LocalDate.now(ZoneId.of(timeZoneId)));
+//        sendAMCAlert(LocalDate.now(ZoneId.of(timeZoneId)));
+        sendAMCAlert(LocalDate.of(2017, 5, 1));
     }
 
     private void sendAMCAlert(LocalDate currentDate) {
