@@ -55,17 +55,19 @@ public class EswatiniPhysicalInventoryNotifier {
         String orderableName = stockCardNotifier.getOrderableName(item.getOrderableId());
         Integer previousStockOnHandWhenSubmitted = item.getPreviousStockOnHandWhenSubmitted();
         Integer quantity = item.getQuantity();
-        int diff = quantity - previousStockOnHandWhenSubmitted;
-        if (diff != 0) {
-          messageBuilder.append(String.format("%s, Stock on Hand: %d, Current Stock: %d%s\n",
-                  orderableName,
-                  previousStockOnHandWhenSubmitted,
-                  quantity,
-                  !Strings.isEmpty(reasonsText) ?
-                          String.format(" , Reasons: %s", reasonsText)
-                          : ""
-                  )
-          );
+        if (previousStockOnHandWhenSubmitted != null) {
+          int diff = quantity - previousStockOnHandWhenSubmitted;
+          if (diff < 0) {
+            messageBuilder.append(String.format("%s, Stock on Hand: %d, Current Stock: %d%s\n",
+                            orderableName,
+                            previousStockOnHandWhenSubmitted,
+                            quantity,
+                            !Strings.isEmpty(reasonsText) ?
+                                    String.format(" , Reasons: %s", reasonsText)
+                                    : ""
+                    )
+            );
+          }
         }
       });
     });
