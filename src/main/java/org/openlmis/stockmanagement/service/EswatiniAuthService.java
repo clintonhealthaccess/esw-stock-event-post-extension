@@ -24,6 +24,12 @@ public class EswatiniAuthService {
     @Value("${auth.server.authorizationUrl}")
     private String authorizationUrl;
 
+    @Value("${requisition.view.api.username}")
+    private String viewRequisitionApiUserName;
+
+    @Value("${requisition.view.api.password}")
+    private String viewRequisitionApiPassword;
+
     private RestOperations restTemplate = new RestTemplate();
 
     /**
@@ -46,8 +52,8 @@ public class EswatiniAuthService {
         RequestParameters params = RequestParameters
                 .init()
                 .set("grant_type", "password")
-                .set("username", "chc_admin")
-                .set("password", "password1");
+                .set("username", viewRequisitionApiUserName)
+                .set("password", viewRequisitionApiPassword);
 
         ResponseEntity<?> response = restTemplate.exchange(
                 createUri(authorizationUrl, params), HttpMethod.POST, request, Object.class

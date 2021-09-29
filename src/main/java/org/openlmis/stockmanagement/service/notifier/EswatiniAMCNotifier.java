@@ -64,6 +64,12 @@ public class EswatiniAMCNotifier {
     @Value("${amc.alert.cron}")
     private String amcAlertCron;
 
+    @Value("${amc.alert.should.override.date}")
+    private boolean amcAlertShouldOverrideDate;
+
+    @Value("${amc.alert.override.date}")
+    private String amcAlertOverrideDate;
+
     @PostConstruct
     private void postConstruct() {
         XLOGGER.debug("amc.alert.cron is {}", amcAlertCron);
@@ -71,9 +77,11 @@ public class EswatiniAMCNotifier {
 
     @Scheduled(cron = "${amc.alert.cron}", zone = "${time.zoneId}")
     public void cronJob() {
-        XLOGGER.debug("INIT amcAlertCron");
-//        sendAMCAlert(LocalDate.now(ZoneId.of(timeZoneId)));
-        sendAMCAlert(LocalDate.of(2020, 11, 1));
+        LocalDate executionDate = LocalDate.now(ZoneId.of(timeZoneId));
+        if (amcAlertShouldOverrideDate)
+           executionDate = LocalDate.parse(amcAlertOverrideDate);
+        XLOGGER.debug("INIT amcAlertCron {}", executionDate);
+        sendAMCAlert(executionDate);
     }
 
     private void sendAMCAlert(LocalDate currentDate) {
