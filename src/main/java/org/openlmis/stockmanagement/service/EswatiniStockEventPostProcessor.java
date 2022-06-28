@@ -39,7 +39,7 @@ public class EswatiniStockEventPostProcessor implements StockEventPostProcessor 
         eswatiniPhysicalInventoryNotifier.notify(stockEventDto);
       } else {
         XLOGGER.debug("This event is not a physical inventory");
-        eswatiniStockAdjustmentNotifier.notify(stockEventDto);
+        //eswatiniStockAdjustmentNotifier.notify(stockEventDto);
       }
     } else {
       XLOGGER.debug("Skip notifying for client only api call");
