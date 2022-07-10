@@ -8,6 +8,8 @@ import org.openlmis.stockmanagement.service.notification.NotificationService;
 import org.openlmis.stockmanagement.service.referencedata.RightReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.SupervisingUsersReferenceDataService;
 import org.openlmis.stockmanagement.service.referencedata.SupervisoryNodeReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.FacilityReferenceDataService;
+import org.openlmis.stockmanagement.service.referencedata.ProgramReferenceDataService;
 import org.slf4j.ext.XLogger;
 import org.slf4j.ext.XLoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +31,12 @@ public class EswatiniStockNotifierService {
 
     @Autowired
     private SupervisingUsersReferenceDataService supervisingUsersReferenceDataService;
+    
+    @Autowired
+    private FacilityReferenceDataService facilityReferenceDataService;
 
     @Autowired
-    private EswatiniStockCardNotifier stockCardNotifier;
+    private ProgramReferenceDataService programReferenceDataService;
 
     @Autowired
     private RightReferenceDataService rightReferenceDataService;
@@ -43,8 +48,8 @@ public class EswatiniStockNotifierService {
         RightDto rightDto = rightReferenceDataService.findRight(STOCK_INVENTORIES_EDIT);
         UUID programId = stockEventDto.getProgramId();
         UUID facilityId = stockEventDto.getFacilityId();
-        String programName = stockCardNotifier.getProgramName(programId);
-        String facilityName = stockCardNotifier.getFacilityName(facilityId);
+        String programName = programReferenceDataService.findOne(programId).getName();
+        String facilityName = facilityReferenceDataService.findOne(facilityId).getName();
 
         Collection<UserDto> recipients = getEditors(programId, facilityId, rightDto.getId());
 
